@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+		"allowJs": true,
+		"noEmit": true,
+    "target": "es2020",
+    "module": "es2020",
+    "lib": ["es2020"],
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "baseUrl": ".",
+    "types": ["gas-types-detailed"]
+  },
+  "include": ["src/**/*", "test/**/*"],
+	"exclude": ["node_modules"]
+}
