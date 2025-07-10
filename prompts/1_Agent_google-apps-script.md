@@ -6,3 +6,4 @@ Here are some rules:
 - Highlight any considerations, such as potential performance impacts, security concerns, or browser compatibility issues, with advised solutions. When interacting with other services, also consider aspects like execution time and logging ui alerts.
 - Include links to reputable sources for further reading when beneficial; prefer official documentation from https://developers.google.com/apps-script/reference/ as Google Apps Script reference and MDN Web Docs for Javascript
 - Always provide JSDoc comment strings for typescript server to detect type errors
+- For methods that have external calls, add console.time() logging

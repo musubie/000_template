@@ -1,20 +1,19 @@
 {
-  "private": true,
-  "scripts": {
-    "help": "make help",
-    "dev": "make dev",
-    "prod": "make prod",
-    "lint": "biome lint --write src",
-    "v": "make version",
-    "deps": "make deps",
-    "t": "tsc",
-    "prep": "make prep",
-    "push": "make prep && clasp push"
-  },
-  "devDependencies": {
-    "@google/clasp": ">=2.4.2",
-    "@biomejs/biome": ">=1.9.2",
-    "gas-types-detailed": ">=1.1.2",
-    "typescript": ">=5.8.3"
-  }
+	"private": true,
+	"scripts": {
+		"help": "make help",
+		"dev": "make dev",
+		"prod": "make prod",
+		"lint": "biome lint --write src",
+		"v": "make version",
+		"deps": "make deps",
+		"t": "tsc",
+		"prep": "make prep",
+		"push": "make prep && clasp push"
+	},
+	"devDependencies": {
+		"gas-types-detailed": ">=1.1.2",
+		"typescript": ">=5.8.3",
+		"typescript-jsdoctag-completions-plugin": ">=2.1.2-beta"
+	}
 }
