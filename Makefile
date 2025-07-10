@@ -1,6 +1,6 @@
 PROD_ID:=
 DEV_ID:=
-rootDir:=
+rootDir:=./src
 
 help: version
 	@echo "dev: use staging apps script file"
@@ -15,27 +15,30 @@ prod:
 	sed -i '' 's/$(DEV_ID)/$(PROD_ID)/' .clasp.json
 
 lint:
-	biome lint --write *.js
+	biome lint --write $(rootDir)/*.js
 
 version: .clasp.json
 	@awk '/"scriptId": "$(DEV_ID)"/ {print "current script: DEV"; exit} \
 	     /"scriptId": "$(PROD_ID)"/ {print "current script: PROD"; exit}' .clasp.json
 
 deps:
-	sed -i '' -E 's/^(function|const|let|var)/export \1/' src/*.js
-	sed -i '' 's|^// import |import |' src/*.js
+	sed -i '' -E 's/^(function|const|let|var)/export \1/' $(rootDir)/*.js
+	sed -i '' 's|^// import |import |' $(rootDir)/*.js
 
 prep:
-	sed -i '' 's|^import |// import |' src/*.js
-	sed -i '' 's/^export //' src/*.js
+	sed -i '' 's|^import |// import |' $(rootDir)/*.js
+	sed -i '' 's/^export //' $(rootDir)/*.js
 
 push: prep
 	clasp push
 
-init:
+install:
+	pnpm install
+
+init: install
 	clasp create --rootDir=$(rootDir)
 
-clone:
+clone: install
 	clasp clone --rootDir=$(rootDir) $(PROD_ID)
 
 .PHONY: dev prod lint version deps prep push init clone
