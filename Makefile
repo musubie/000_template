@@ -17,20 +17,30 @@ prod:
 lint:
 	biome lint --write $(rootDir)/*.js
 
+fmt:
+	biome format --write $(rootDir)/*.js
+
 version: .clasp.json
 	@awk '/"scriptId": "$(DEV_ID)"/ {print "current script: DEV"; exit} \
 	     /"scriptId": "$(PROD_ID)"/ {print "current script: PROD"; exit}' .clasp.json
 
-deps:
-	sed -i '' -E 's/^(function|const|let|var)/export \1/' $(rootDir)/*.js
-	sed -i '' 's|^// import |import |' $(rootDir)/*.js
+deps: fmt
+	./blkuc.pl $(rootDir)/*.js
 
-prep:
-	sed -i '' 's|^import |// import |' $(rootDir)/*.js
-	sed -i '' 's/^export //' $(rootDir)/*.js
+prep: fmt
+	./blkc.pl $(rootDir)/*.js
 
-push: prep
+clasp-pull: version
+	clasp pull
+
+pull: clasp-pull
+	$(MAKE) deps
+
+clasp-push: prep version
 	clasp push
+
+push: clasp-push
+	$(MAKE) deps
 
 install:
 	pnpm install
@@ -41,5 +51,4 @@ init: install
 clone: install
 	clasp clone --rootDir=$(rootDir) $(PROD_ID)
 
-.PHONY: dev prod lint version deps prep push init clone
-
+.PHONY: dev prod lint version deps prep push init clone fmt
