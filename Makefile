@@ -1,4 +1,4 @@
-PROD_ID:=
+PROD_ID:=1C_QihITF1z92ttUMrYDQtkd5d2FjCFRjAgiiwAQrkKWHtpHjV-9O8QfT
 DEV_ID:=
 rootDir:=./src
 
@@ -17,20 +17,33 @@ prod:
 lint:
 	biome lint --write $(rootDir)/*.js
 
+fmt:
+	biome format --write $(rootDir)/*.js
+
 version: .clasp.json
 	@awk '/"scriptId": "$(DEV_ID)"/ {print "current script: DEV"; exit} \
 	     /"scriptId": "$(PROD_ID)"/ {print "current script: PROD"; exit}' .clasp.json
 
-deps:
-	sed -i '' -E 's/^(function|const|let|var)/export \1/' $(rootDir)/*.js
-	sed -i '' 's|^// import |import |' $(rootDir)/*.js
+deps: fmt
+	./blkuc.pl $(rootDir)/*.js
 
-prep:
-	sed -i '' 's|^import |// import |' $(rootDir)/*.js
-	sed -i '' 's/^export //' $(rootDir)/*.js
+prep: fmt
+	./blkc.pl $(rootDir)/*.js
 
-push: prep
+clasp-pull: version
+	clasp pull
+
+pull: clasp-pull
+	$(MAKE) deps
+
+clasp-push: prep version
 	clasp push
+
+push: clasp-push
+	$(MAKE) deps
+
+test:
+	cd src && node --experimental-vm-modules ../test/run-tests.mjs
 
 install:
 	pnpm install
@@ -41,5 +54,4 @@ init: install
 clone: install
 	clasp clone --rootDir=$(rootDir) $(PROD_ID)
 
-.PHONY: dev prod lint version deps prep push init clone
-
+.PHONY: dev prod lint version deps prep push clasp-push init clone fmt test
