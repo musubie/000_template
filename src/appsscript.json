@@ -1,12 +1,31 @@
 {
   "timeZone": "Asia/Tokyo",
   "dependencies": {
-    "enabledAdvancedServices": [{
-      "userSymbol": "AdminReports",
-      "serviceId": "reports",
-      "version": "reports_v1"
-    }]
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "AdminReports",
+        "serviceId": "admin",
+        "version": "reports_v1"
+      },
+      {
+        "userSymbol": "AdminDirectory",
+        "serviceId": "admin",
+        "version": "directory_v1"
+      },
+      {
+        "userSymbol": "Calendar",
+        "serviceId": "calendar",
+        "version": "v3"
+      }
+    ]
   },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/admin.reports.audit.readonly",
+    "https://www.googleapis.com/auth/admin.directory.user.readonly",
+    "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/script.external_request"
+  ],
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8"
 }

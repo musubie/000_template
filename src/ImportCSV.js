@@ -1,46 +1,43 @@
 /**
- * Imports CSV data from a Google Drive file into the active spreadsheet.
- * This function is designed to be triggered manually or on a schedule.
+ * @fileoverview Legacy CSV import utility
+ * Imports CSV data from Google Drive into a spreadsheet.
+ * Note: Uses standalone GAS pattern with openById.
+ */
+
+/**
+ * Imports CSV data from a Google Drive file into the target spreadsheet.
  */
 function importCSVFromDrive() {
-  var fileName = "looker_activity_log.csv"; // The name of the file to import
-  var sheetName = "ActivityData"; // The name of the sheet to update
+  const fileName = "looker_activity_log.csv";
+  const sheetName = "ActivityData";
+  const spreadsheetId = Config.get("SPREADSHEET_IDS").CALENDAR_ANALYSIS;
 
-  var files = DriveApp.getFilesByName(fileName);
-  
+  const files = DriveApp.getFilesByName(fileName);
+
   if (!files.hasNext()) {
-    Logger.log("File not found: " + fileName);
-    return;
+    Logger.log(`File not found: ${fileName}`);
+    return { success: false, reason: "File not found" };
   }
 
-  var file = files.next();
-  var csvData = Utilities.parseCsv(file.getBlob().getDataAsString());
-  
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(sheetName);
-  
+  const file = files.next();
+  const csvData = Utilities.parseCsv(file.getBlob().getDataAsString());
+
+  const ss = SpreadsheetApp.openById(spreadsheetId);
+  let sheet = ss.getSheetByName(sheetName);
+
   // Create sheet if it doesn't exist
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
   } else {
-    sheet.clear(); // Clear existing data
+    sheet.clear();
   }
 
   // Write data to sheet
   if (csvData.length > 0) {
     sheet.getRange(1, 1, csvData.length, csvData[0].length).setValues(csvData);
-    Logger.log("Imported " + csvData.length + " rows from " + fileName);
-  } else {
-    Logger.log("CSV file is empty.");
+    Logger.log(`Imported ${csvData.length} rows from ${fileName}`);
+    return { success: true, rows: csvData.length };
   }
-}
-
-/**
- * Menu item to run the import manually
- */
-function onOpen() {
-  var ui = SpreadsheetApp.getUi();
-  ui.createMenu('Meet Stats')
-      .addItem('Import CSV Data', 'importCSVFromDrive')
-      .addToUi();
+  Logger.log("CSV file is empty.");
+  return { success: false, reason: "Empty file" };
 }
