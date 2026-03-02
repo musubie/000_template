@@ -1,90 +1,169 @@
-# プロジェクト概要
+# GAS プロジェクトテンプレート
 
-このリポジトリは Google Apps Script を TypeScript/JavaScript で開発するための雛形です。`clasp` を使ってスクリプトの管理・デプロイを行います。
+Google Apps Script (GAS) を `clasp` + TypeScript 型チェックで開発するための雛形リポジトリ。
 
-# 前提条件
+## 前提条件
 
-- Node.js（推奨: v14 以上）
-- pnpm, bun, npm または yarn
-- Google アカウント
-- clasp（Google Apps Script CLI）
-  ```bash
-  npm install -g @google/clasp
-  ```
+| ツール | バージョン | 用途 |
+|--------|-----------|------|
+| Node.js | v18+ | ランタイム |
+| pnpm | latest | パッケージ管理 |
+| clasp | latest | GAS CLI (`npm i -g @google/clasp`) |
+| Perl | 5.x (macOS 標準) | import/export トグル |
 
-# 初期セットアップ
+## セットアップ
 
-1. このリポジトリをクローン／ダウンロード
-   ```bash
-   git clone <repository_url>
-   cd <repository_dir>
-   ```
+### 新規プロジェクトの場合
 
-2. 依存パッケージをインストール
-   ```bash
-   npm install
-   ```
+```bash
+# 1. テンプレートからリポジトリを作成
+git clone <template_url> <project_name>
+cd <project_name>
 
-3. clasp にログイン
-   ```bash
-   clasp login --no-localhost
-   ```
-   ブラウザで認証を行い、成功するとターミナルに「Logged in」表示が出ます。
+# 2. 依存パッケージをインストール
+pnpm install
 
-4. プロジェクトを作成／クローン
-   - 既存プロジェクトをクローンする場合
-     ```bash
-     clasp clone --rootDir './src' <SCRIPT_ID>
-     ```
-   - 新規プロジェクトを作成する場合
-     ```bash
-     clasp create --rootDir './src' --title "<プロジェクト名>"
-     ```
-   実行後、プロジェクト直下に `.clasp.json` が生成されます。
+# 3. clasp にログイン（初回のみ）
+clasp login
 
-5. `.clasp.json` の `rootDir` を `./src` に変更
-   ```json
-   {
-     "scriptId": "<YOUR_SCRIPT_ID>",
-     "rootDir": "./src"
-   }
-   ```
+# 4. Apps Script プロジェクトを作成
+make init
+# → .clasp.json が生成される
 
-6. ソースディレクトリ構成
-   ```
-   .
-   ├─ .clasp.json
-   ├─ package.json
-   ├─ tsconfig.json
-   └─ src/
-       ├─ index.ts
-       └─ ...
-   ```
+# 5. Makefile の ID を設定
+# PROD_ID, DEV_ID に Apps Script のスクリプト ID を記入
+```
 
-# 開発フロー
+### 既存プロジェクトをクローンする場合
 
-- コード編集：`src/` 配下に TypeScript/JavaScript ファイルを作成・編集
-- ビルド（TypeScript を使う場合）
-  ```bash
-  npm run build
-  ```
-- スクリプトをデプロイ
-  ```bash
-  clasp push
-  ```
-- リモート変更を取得
-  ```bash
-  clasp pull
-  ```
+```bash
+# 1. リポジトリをクローン
+git clone <repository_url>
+cd <project_name>
 
-# よく使うコマンド
+# 2. 依存パッケージをインストール
+pnpm install
 
-- `npm install`
-- `npm run build`
-- `clasp login`
-- `clasp push`
-- `clasp pull`
+# 3. Makefile の PROD_ID を確認し、Apps Script をクローン
+make clone
+# → src/ に既存コードがダウンロードされる
 
----
+# 4. import/export を復元
+make deps
+```
 
-以上で初期セットアップは完了です。開発をお楽しみください！
+## 開発フロー
+
+### コマンド一覧
+
+| コマンド | 説明 |
+|---------|------|
+| `make help` | コマンド一覧を表示 |
+| `make version` | 現在の環境（DEV/PROD）を表示 |
+| `make dev` | DEV 環境に切り替え |
+| `make prod` | PROD 環境に切り替え |
+| `make lint` | biome lint を実行 |
+| `make fmt` | biome format を実行 |
+| `make deps` | import/export をアクティブに（開発用） |
+| `make prep` | import/export をコメントアウト（デプロイ用） |
+| `make push` | prep → clasp push → deps（デプロイ） |
+| `make pull` | clasp pull → deps（リモート変更取得） |
+| `make test` | ローカルテストを実行 |
+| `pnpm t` | TypeScript 型チェック（tsc） |
+
+### 編集 → デプロイ手順
+
+```
+1. コードを編集（src/ 配下）
+2. make lint          # リント
+3. pnpm t             # 型チェック
+4. make push          # デプロイ（DEV 環境で確認後、make prod → make push）
+```
+
+## import/export の規約
+
+GAS は ES Modules をサポートしないため、デプロイ前に `import`/`export` 文をコメントアウトする必要がある。この切り替えを `blkc.pl`（コメント化）と `blkuc.pl`（復元）で自動化している。
+
+### 動作の仕組み
+
+- **`make prep`** → `blkc.pl` が `import`/`export` 文を `/* ... */` でラップ
+- **`make deps`** → `blkuc.pl` が `/* ... */` を除去して復元
+- **`make push`** → prep → clasp push → deps を一括実行
+
+### export の書き方（重要）
+
+`blkc.pl` / `blkuc.pl` が正しく動作するには、**末尾で別行の export 宣言**を使う必要がある：
+
+```javascript
+// OK: 末尾の export 宣言（blkc.pl が正しくコメント化できる）
+function myFunction() { ... }
+const MY_CONST = 123;
+
+export { myFunction, MY_CONST };
+
+// NG: インライン export（blkc.pl が正しく処理できない）
+export function myFunction() { ... }
+export const MY_CONST = 123;
+```
+
+## ローカルテスト
+
+[gas-fakes](https://github.com/brucemcpherson/gas-fakes) を使うと、GAS のグローバルオブジェクト（`SpreadsheetApp` 等）をローカル環境でエミュレートできる。
+
+### セットアップ
+
+```bash
+# 1. 依存パッケージを追加
+pnpm add -D @mcpher/gas-fakes dotenv
+
+# 2. 初期化・認証
+gas-fakes init        # .env ファイルを生成
+gas-fakes auth        # Google 認証
+gas-fakes enableAPIs  # 必要な API を有効化
+```
+
+### テストの書き方
+
+`test/run.js` にテストコードを記述：
+
+```javascript
+import "@mcpher/gas-fakes";
+
+// src/ のモジュールをインポート（.js 拡張子が必要）
+import { myFunction } from "../src/myModule.js";
+
+// テスト実行
+const result = myFunction();
+Logger.log(result);
+```
+
+### 実行
+
+```bash
+make test
+# または
+pnpm test
+```
+
+> `[Worker Error] Failed in sxDrive` はドライブ API の非致命的な警告。Sheets API は正常に動作する。
+
+## ディレクトリ構成
+
+```
+.
+├── src/                 # ソースコード（clasp の rootDir）
+│   └── appsscript.json  # GAS マニフェスト
+├── test/                # ローカルテスト（gas-fakes）
+│   └── run.js           # テストランナー
+├── prompts/             # AI エージェント用プロンプト
+├── blkc.pl              # import/export コメント化スクリプト
+├── blkuc.pl             # import/export 復元スクリプト
+├── globals.d.ts         # グローバル型定義
+├── package.json         # プロジェクト設定
+├── tsconfig.json        # TypeScript 設定
+├── biome.json           # Linter/Formatter 設定
+├── Makefile             # ビルドコマンド
+├── CLAUDE.md            # Claude Code ガイダンス
+├── AGENTS.md            # AI エージェント用ガイドライン
+└── CHANGELOG.md         # 変更履歴
+```

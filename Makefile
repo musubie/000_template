@@ -42,6 +42,9 @@ clasp-push: prep version
 push: clasp-push
 	$(MAKE) deps
 
+test:
+	pnpm test
+
 install:
 	pnpm install
 
@@ -51,4 +54,4 @@ init: install
 clone: install
 	clasp clone --rootDir=$(rootDir) $(PROD_ID)
 
-.PHONY: dev prod lint version deps prep push init clone fmt
+.PHONY: dev prod lint version deps prep push init clone fmt pull clasp-push clasp-pull test
