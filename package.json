@@ -1,21 +1,25 @@
 {
-	"private": true,
-	"type": "module",
-	"scripts": {
-		"help": "make help",
-		"dev": "make dev",
-		"prod": "make prod",
-		"lint": "biome lint --write src",
-		"v": "make version",
-		"deps": "make deps",
-		"t": "tsc",
-		"prep": "make prep",
-		"push": "make push",
-		"test": "cd src && node ../test/run.js"
-	},
-	"devDependencies": {
-		"gas-types-detailed": "^1.1.3",
-		"typescript": "^5.9.3",
-		"typescript-jsdoctag-completions-plugin": "2.1.2-beta"
-	}
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "help": "make help",
+    "dev": "make dev",
+    "prod": "make prod",
+    "lint": "make lint",
+    "fmt": "make fmt",
+    "v": "make version",
+    "deps": "make deps",
+    "t": "tsc",
+    "prep": "make prep",
+    "push": "make push",
+    "test": "make test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@mcpher/gas-fakes": "^1.2.23",
+    "gas-types-detailed": ">=1.1.3",
+    "husky": "^9.1.7",
+    "typescript": ">=5.8.3",
+    "typescript-jsdoctag-completions-plugin": ">=2.1.2-beta"
+  }
 }

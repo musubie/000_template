@@ -46,5 +46,5 @@ make test         # Run local tests with gas-fakes
 ## Testing
 
 - Local tests use [gas-fakes](https://github.com/brucemcpherson/gas-fakes) for real Google API access
-- Test runner: `test/run.js` (executed via `pnpm test` from `src/` directory)
+- Test runner: `test/run-tests.mjs` (executed via `pnpm test` from `src/` directory)
 - `[Worker Error] Failed in sxDrive` messages are non-fatal; Sheets API still works

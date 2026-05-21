@@ -15,22 +15,22 @@ for my $file (@ARGV) {
         print STDERR "Warning: File '$file' not found, skipping.\n";
         next;
     }
-
+    
     # Read entire file
     local $/;
     open my $fh, '<', $file or die "Cannot open $file: $!";
     my $content = <$fh>;
     close $fh;
-
+    
     # Apply block comment transformations
     $content =~ s#^(import\s+[\s\S]*?;)$#/* $1 */#gm;
     $content =~ s#^(export\s+(?:const|let|var|function|class)\s+\w+[\s\S]*?[;}])$#/* $1 */#gm;
     $content =~ s#^(export\s+\{[\s\S]*?\}\s*;?)$#/* $1 */#gm;
-
+    
     # Write back to file
     open $fh, '>', $file or die "Cannot write to $file: $!";
     print $fh $content;
     close $fh;
-
+    
     print "Commented: $file\n";
 }

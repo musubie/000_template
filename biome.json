@@ -26,6 +26,12 @@
 			"recommended": true,
 			"correctness": {
 				"noUnusedVariables": "off"
+			},
+			"style": {
+				"useTemplate": "warn"
+			},
+			"complexity": {
+				"useOptionalChain": "warn"
 			}
 		}
 	},

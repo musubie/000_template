@@ -1,4 +1,4 @@
-PROD_ID:=
+PROD_ID:=1C_QihITF1z92ttUMrYDQtkd5d2FjCFRjAgiiwAQrkKWHtpHjV-9O8QfT
 DEV_ID:=
 rootDir:=./src
 
@@ -43,7 +43,7 @@ push: clasp-push
 	$(MAKE) deps
 
 test:
-	pnpm test
+	cd src && node --experimental-vm-modules ../test/run-tests.mjs
 
 install:
 	pnpm install
@@ -54,4 +54,4 @@ init: install
 clone: install
 	clasp clone --rootDir=$(rootDir) $(PROD_ID)
 
-.PHONY: dev prod lint version deps prep push init clone fmt pull clasp-push clasp-pull test
+.PHONY: dev prod lint version deps prep push clasp-push init clone fmt test
