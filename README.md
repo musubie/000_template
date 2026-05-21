@@ -2,14 +2,23 @@
 
 Google Apps Script (GAS) を `clasp` + TypeScript 型チェックで開発するための雛形リポジトリ。
 
+## 関連ナレッジ（むすびえ内部）
+
+- [GAS Scriptの運用](https://www.notion.so/93e9519c2a3b44f09eb2e3f76b47e623) — Script 格納場所（D1 / D3 Drive）と GitHub Organization 管理ルール、900 番台採番ルール（`u` / `env` Library）
+- [ICTのApps ScriptのAI運用](https://www.notion.so/31abfedc6ea4809680abebfead371d1e) — Apps Script 開発で使う AI CLI（Antigravity / Gemini CLI / Codex / Claude Code）の MCP セットアップ
+- [開発のDevops運用](https://www.notion.so/a35638da76d844c58da272509a92fc00) — GitHub Organization / merge 方針など Devops 運用全般
+
 ## 前提条件
 
 | ツール | バージョン | 用途 |
 |--------|-----------|------|
 | Node.js | v18+ | ランタイム |
 | pnpm | latest | パッケージ管理 |
-| clasp | latest | GAS CLI (`npm i -g @google/clasp`) |
-| Perl | 5.x (macOS 標準) | import/export トグル |
+| clasp | latest | GAS CLI (`pnpm i -g @google/clasp`) |
+| GNU Make | 3.8+ | Makefile 実行 |
+| Perl | 5.x | import/export トグル（`blkc.pl` / `blkuc.pl`） |
+
+> **Windows ユーザー向け補足**: `make` と `perl` は標準では入っていない。WSL (Ubuntu 等) を使うのが最も摩擦が少ない。
 
 ## セットアップ
 
@@ -71,14 +80,31 @@ make deps
 | `make test` | ローカルテストを実行 |
 | `pnpm t` | TypeScript 型チェック（tsc） |
 
-### 編集 → デプロイ手順
+### 日常の開発サイクル
 
 ```
-1. コードを編集（src/ 配下）
-2. make lint          # リント
-3. pnpm t             # 型チェック
-4. make push          # デプロイ（DEV 環境で確認後、make prod → make push）
+1. make version       # 現在の接続先（DEV/PROD）を確認
+2. make dev           # DEV 環境に切り替え（必要な場合）
+3. make pull          # リモートの最新コードを取得（clasp pull → deps）
+4. コードを編集（src/ 配下）
+5. make lint          # リント
+6. pnpm t             # 型チェック
+7. make push          # DEV にデプロイ（prep → clasp push → deps）
+8. Apps Script 上で DEV 動作確認
+9. make prod          # PROD 環境に切り替え
+10. make push         # PROD にデプロイ
+11. make dev          # 終了時に DEV に戻しておく（誤デプロイ防止）
 ```
+
+### 環境切り替えの注意
+
+- `make dev` / `make prod` は `.clasp.json` を `PROD_ID` / `DEV_ID` に差し替える操作。`make version` で必ず接続先を確認してから `make push` する。
+- `make push` 単体は現在の接続先にデプロイするため、PROD のまま編集して push すると本番に反映される。作業開始時は `make dev` から入る運用を推奨。
+
+### 単発操作
+
+- リモート変更のみ取り込みたい: `make pull`
+- ローカルだけで完結する確認: `make lint` / `pnpm t` / `make test`
 
 ## import/export の規約
 
